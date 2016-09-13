@@ -1,0 +1,5 @@
+*.h5
+MNIST_data/
+checkpoints/
+*.pyc
+train_log

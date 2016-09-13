@@ -240,7 +240,7 @@ for i in tqdm(range(i_iter, num_iter)):
             ratio = max(0, ratio / (num_epochs - decay_after))
             sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-        # print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
+        print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
         with open('train_log', 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
