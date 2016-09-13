@@ -5,6 +5,7 @@ import os
 import urllib
 
 import numpy
+import deepdish as dd
 
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
 
@@ -83,9 +84,10 @@ class DataSet(object):
 
       # Convert shape from [num examples, rows, columns, depth]
       # to [num examples, rows*columns] (assuming depth == 1)
-      assert images.shape[3] == 1
+
+      # assert images.shape[3] == 1
       images = images.reshape(images.shape[0],
-                              images.shape[1] * images.shape[2])
+                              images.shape[1] * images.shape[2] * images.shape[3])
       # Convert from [0, 255] -> [0.0, 1.0].
       images = images.astype(numpy.float32)
       images = numpy.multiply(images, 1.0 / 255.0)
@@ -168,6 +170,13 @@ class SemiDataSet(object):
         images = numpy.vstack([labeled_images, unlabeled_images])
         return images, labels
 
+def extract_plantvillage_data(filename):
+    print "Attempting to load : ", filename
+    data = dd.io.load(filename)
+    images = data['data']
+    labels = data['coarse_labels']
+    return (images, labels)
+
 def read_data_sets(train_dir, n_labeled = 100, fake_data=False, one_hot=False):
   class DataSets(object):
     pass
@@ -179,23 +188,12 @@ def read_data_sets(train_dir, n_labeled = 100, fake_data=False, one_hot=False):
     data_sets.test = DataSet([], [], fake_data=True)
     return data_sets
 
-  TRAIN_IMAGES = 'train-images-idx3-ubyte.gz'
-  TRAIN_LABELS = 'train-labels-idx1-ubyte.gz'
-  TEST_IMAGES = 't10k-images-idx3-ubyte.gz'
-  TEST_LABELS = 't10k-labels-idx1-ubyte.gz'
+  TRAIN_FILE = 'train.h5'
+  TEST_FILE = 'validation.h5'
   VALIDATION_SIZE = 0
 
-  local_file = maybe_download(TRAIN_IMAGES, train_dir)
-  train_images = extract_images(local_file)
-
-  local_file = maybe_download(TRAIN_LABELS, train_dir)
-  train_labels = extract_labels(local_file, one_hot=one_hot)
-
-  local_file = maybe_download(TEST_IMAGES, train_dir)
-  test_images = extract_images(local_file)
-
-  local_file = maybe_download(TEST_LABELS, train_dir)
-  test_labels = extract_labels(local_file, one_hot=one_hot)
+  train_images, train_labels = extract_plantvillage_data(train_dir+"/"+TRAIN_FILE)
+  test_images, test_labels = extract_plantvillage_data(train_dir+"/"+TEST_FILE)
 
   validation_images = train_images[:VALIDATION_SIZE]
   validation_labels = train_labels[:VALIDATION_SIZE]
