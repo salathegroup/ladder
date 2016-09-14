@@ -45,7 +45,9 @@ def extract_images(filename):
     return data
 
 
-def dense_to_one_hot(labels_dense, num_classes=10):
+def dense_to_one_hot(labels_dense, num_classes=32):
+  print(labels_dense)
+  num_classes = int(num_classes)
   """Convert class labels from scalars to one-hot vectors."""
   num_labels = labels_dense.shape[0]
   index_offset = numpy.arange(num_labels) * num_classes
@@ -115,7 +117,7 @@ class DataSet(object):
   def next_batch(self, batch_size, fake_data=False):
     """Return the next `batch_size` examples from this data set."""
     if fake_data:
-      fake_image = [1.0 for _ in xrange(784)]
+      fake_image = [1.0 for _ in xrange(196608)]
       fake_label = 0
       return [fake_image for _ in xrange(batch_size)], [
           fake_label for _ in xrange(batch_size)]
@@ -149,10 +151,14 @@ class SemiDataSet(object):
         shuffled_indices = numpy.random.permutation(indices)
         images = images[shuffled_indices]
         labels = labels[shuffled_indices]
-        y = numpy.array([numpy.arange(10)[l==1][0] for l in labels])
+        y = numpy.array([numpy.arange(32)[l==1][0] for l in labels])
         idx = indices[y==0][:5]
-        n_classes = y.max() + 1
+
+        n_classes = int(y.max() + 1)
         n_from_each_class = n_labeled / n_classes
+	print(n_classes, n_from_each_class)
+	print(indices)
+
         i_labeled = []
         for c in range(n_classes):
             i = indices[y==c][:n_from_each_class]
@@ -171,10 +177,10 @@ class SemiDataSet(object):
         return images, labels
 
 def extract_plantvillage_data(filename):
-    print "Attempting to load : ", filename
+    print("Attempting to load : ", filename)
     data = dd.io.load(filename)
     images = data['data']
-    labels = data['coarse_labels']
+    labels = dense_to_one_hot(data['coarse_labels']-1)
     return (images, labels)
 
 def read_data_sets(train_dir, n_labeled = 100, fake_data=False, one_hot=False):

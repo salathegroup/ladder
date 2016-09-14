@@ -6,19 +6,20 @@ import os
 import csv
 from tqdm import tqdm
 
-layer_sizes = [784, 1000, 500, 250, 250, 250, 10]
+#layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
+layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage
 
 L = len(layer_sizes) - 1  # number of layers
 
-num_examples = 60000
+num_examples = 22695
 num_epochs = 150
-num_labeled = 100
+num_labeled = 960
 
 starter_learning_rate = 0.02
 
 decay_after = 15  # epoch after which to begin learning rate decay
 
-batch_size = 100
+batch_size = 4
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 inputs = tf.placeholder(tf.float32, shape=(None, layer_sizes[0]))
@@ -202,7 +203,8 @@ with tf.control_dependencies([train_step]):
     train_step = tf.group(bn_updates)
 
 print "===  Loading Data ==="
-mnist = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
+#mnist = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
+mnist = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
 
 saver = tf.train.Saver()
 
@@ -226,7 +228,7 @@ else:
     sess.run(init)
 
 print "=== Training ==="
-print "Initial Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%"
+#print "Initial Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%"
 
 for i in tqdm(range(i_iter, num_iter)):
     images, labels = mnist.train.next_batch(batch_size)
@@ -240,12 +242,13 @@ for i in tqdm(range(i_iter, num_iter)):
             ratio = max(0, ratio / (num_epochs - decay_after))
             sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-        print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
+        #print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
         with open('train_log', 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
-            log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False})
-            train_log_w.writerow(log_i)
+            #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False})
+            #train_log_w.writerow(log_i)
+            train_log_w.writerow("Epoch :: " + str(epoch_n))
 
 print "Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%"
 
