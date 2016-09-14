@@ -6,6 +6,14 @@ import os
 import csv
 from tqdm import tqdm
 
+
+"""
+TO-DO
+* Implement accuracy estimation in batches
+* Implement multi gpu training
+	* Reference : https://github.com/tensorflow/tensorflow/blob/master/tensorflow/models/image/cifar10/cifar10_multi_gpu_train.py
+"""
+
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
 layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage
 
