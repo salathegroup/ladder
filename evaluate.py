@@ -21,7 +21,7 @@ starter_learning_rate = 0.02
 
 decay_after = 15  # epoch after which to begin learning rate decay
 
-batch_size = 500
+batch_size = 1000
 #num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 num_iter = num_validate/batch_size
 
@@ -225,5 +225,17 @@ else:
 
 print "=== Evaluating ==="
 #Test just on the labelled subset of the training set
+"""
 print "Accuracy (labelled subset of the training set): ", sess.run(accuracy, feed_dict={inputs: mnist.train.labeled_ds.images, outputs: mnist.train.labeled_ds.labels, training: False}), "%"
+"""
+
+"""
+Evaluate on the test set :
+"""
+for _i in range(num_validate/batch_size):
+	images, labels = mnist.test.next_batch(batch_size)
+	print "="*100
+	print "Iteration : ", _i
+	print "Accuracy (on test set in general)", sess.run(accuracy, feed_dict={inputs: images, outputs: labels, training: False}), "%"
 sess.close()
+
