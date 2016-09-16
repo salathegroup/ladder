@@ -27,7 +27,7 @@ starter_learning_rate = 0.02
 
 decay_after = 15  # epoch after which to begin learning rate decay
 
-batch_size = 4
+batch_size = 2
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 inputs = tf.placeholder(tf.float32, shape=(None, layer_sizes[0]))
@@ -211,8 +211,8 @@ with tf.control_dependencies([train_step]):
     train_step = tf.group(bn_updates)
 
 print "===  Loading Data ==="
-#mnist = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
-mnist = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
+#plantvillage = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
+plantvillage = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
 
 saver = tf.train.Saver()
 
@@ -236,10 +236,10 @@ else:
     sess.run(init)
 
 print "=== Training ==="
-#print "Initial Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%"
+#print "Initial Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%"
 
 for i in tqdm(range(i_iter, num_iter)):
-    images, labels = mnist.train.next_batch(batch_size)
+    images, labels = plantvillage.train.next_batch(batch_size)
     sess.run(train_step, feed_dict={inputs: images, outputs: labels, training: True})
     if (i > 1) and ((i+1) % (num_iter/num_epochs) == 0):
         epoch_n = i/(num_examples/batch_size)
@@ -250,14 +250,14 @@ for i in tqdm(range(i_iter, num_iter)):
             ratio = max(0, ratio / (num_epochs - decay_after))
             sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-        #print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
+        #print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs:plantvillage.test.labels, training: False}), "%"
         with open('train_log', 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
-            #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False})
+            #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
             #train_log_w.writerow(log_i)
             train_log_w.writerow(["Epoch :: "] + [str(epoch_n)])
 
-print "Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%"
+print "Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%"
 
 sess.close()
