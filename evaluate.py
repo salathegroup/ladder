@@ -198,8 +198,8 @@ correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(outputs, 1))  # no of c
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float")) * tf.constant(100.0)
 
 print "===  Loading Data ==="
-#mnist = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
-mnist = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
+#plantvillage = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
+plantvillage = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
 
 saver = tf.train.Saver()
 
@@ -226,14 +226,14 @@ else:
 print "=== Evaluating ==="
 #Test just on the labelled subset of the training set
 """
-print "Accuracy (labelled subset of the training set): ", sess.run(accuracy, feed_dict={inputs: mnist.train.labeled_ds.images, outputs: mnist.train.labeled_ds.labels, training: False}), "%"
+print "Accuracy (labelled subset of the training set): ", sess.run(accuracy, feed_dict={inputs: plantvillage.train.labeled_ds.images, outputs: plantvillage.train.labeled_ds.labels, training: False}), "%"
 """
 
 """
 Evaluate on the test set :
 """
 for _i in range(num_validate/batch_size):
-	images, labels = mnist.test.next_batch(batch_size)
+	images, labels = plantvillage.test.next_batch(batch_size)
 	print "="*100
 	print "Iteration : ", _i
 	print "Accuracy (on test set in general)", sess.run(accuracy, feed_dict={inputs: images, outputs: labels, training: False}), "%"
