@@ -24,15 +24,15 @@ layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage
 layer_sizes = [2048, 2000, 1000, 500, 250, 125, 38]
 L = len(layer_sizes) - 1  # number of layers
 
-num_examples = 22695
-num_epochs = 150
+num_examples = 43444
+num_epochs = 400
 num_labeled = 380
 
 starter_learning_rate = 0.00005
 
-decay_after = 15  # epoch after which to begin learning rate decay
+# decay_after = 15  # epoch after which to begin learning rate decay
 
-batch_size = 32
+batch_size = 100
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 inputs = tf.placeholder(tf.float32, shape=(None, layer_sizes[0]))
