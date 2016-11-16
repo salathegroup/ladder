@@ -45,9 +45,8 @@ def extract_images(filename):
     return data
 
 
-def dense_to_one_hot(labels_dense, num_classes=32):
-  print(labels_dense)
-  num_classes = int(num_classes)
+def dense_to_one_hot(labels_dense, num_classes=38):
+  num_classes = len(set(labels_dense))
   """Convert class labels from scalars to one-hot vectors."""
   num_labels = labels_dense.shape[0]
   index_offset = numpy.arange(num_labels) * num_classes
@@ -88,11 +87,10 @@ class DataSet(object):
       # to [num examples, rows*columns] (assuming depth == 1)
 
       # assert images.shape[3] == 1
-      images = images.reshape(images.shape[0],
-                              images.shape[1] * images.shape[2] * images.shape[3])
+      #images = images.reshape(images.shape[0], images.shape[1] * images.shape[2] * images.shape[3])
       # Convert from [0, 255] -> [0.0, 1.0].
       images = images.astype(numpy.float32)
-      images = numpy.multiply(images, 1.0 / 255.0)
+      #images = numpy.multiply(images, 1.0 / 255.0)
     self._images = images
     self._labels = labels
     self._epochs_completed = 0
@@ -151,13 +149,13 @@ class SemiDataSet(object):
         shuffled_indices = numpy.random.permutation(indices)
         images = images[shuffled_indices]
         labels = labels[shuffled_indices]
-        y = numpy.array([numpy.arange(32)[l==1][0] for l in labels])
+        y = numpy.array([numpy.arange(38)[l==1][0] for l in labels])
         idx = indices[y==0][:5]
 
         n_classes = int(y.max() + 1)
         n_from_each_class = n_labeled / n_classes
-	print(n_classes, n_from_each_class)
-	print(indices)
+        print(n_classes, n_from_each_class)
+        print(indices)
 
         i_labeled = []
         for c in range(n_classes):

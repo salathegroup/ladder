@@ -1,10 +1,15 @@
-import tensorflow as tf
-from tensorflow.python import control_flow_ops
 import input_data
 import math
 import os
 import csv
 from tqdm import tqdm
+
+"""
+Temporary Monkey Patch
+"""
+import tensorflow as tf
+from tensorflow.python.ops import control_flow_ops
+tf.python.control_flow_ops = control_flow_ops
 
 
 """
@@ -16,18 +21,18 @@ TO-DO
 
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
 layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage
-
+layer_sizes = [2048, 2000, 1000, 500, 250, 125, 38]
 L = len(layer_sizes) - 1  # number of layers
 
 num_examples = 22695
 num_epochs = 150
-num_labeled = 960
+num_labeled = 380
 
-starter_learning_rate = 0.02
+starter_learning_rate = 0.00005
 
 decay_after = 15  # epoch after which to begin learning rate decay
 
-batch_size = 2
+batch_size = 32
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 inputs = tf.placeholder(tf.float32, shape=(None, layer_sizes[0]))
@@ -50,10 +55,19 @@ weights = {'W': [wi(s, "W") for s in shapes],  # Encoder weights
            # batch normalization parameter to scale the normalized value
            'gamma': [bi(1.0, layer_sizes[l+1], "beta") for l in range(L)]}
 
-noise_std = 0.3  # scaling factor for noise used in corrupted encoder
+noise_std = 0.0025  # scaling factor for noise used in corrupted encoder
 
 # hyperparameters that denote the importance of each layer
-denoising_cost = [1000.0, 10.0, 0.10, 0.10, 0.10, 0.10, 0.10]
+#denoising_cost = [1, 10.0, 0.10, 0.10, 0.10, 0.10, 0.10]
+decoder_decay = 0.0001
+decoder_bottom_cost = 1
+denoising_cost = []
+cost = decoder_bottom_cost
+for i in range(2):
+	denoising_cost.append(cost)
+	cost = cost * decoder_decay
+while len(denoising_cost) < len(layer_sizes):
+	denoising_cost.append(cost)
 
 join = lambda l, u: tf.concat(0, [l, u])
 labeled = lambda x: tf.slice(x, [0, 0], [batch_size, -1]) if x is not None else x
@@ -212,7 +226,7 @@ with tf.control_dependencies([train_step]):
 
 print "===  Loading Data ==="
 #plantvillage = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
-plantvillage = input_data.read_data_sets("plantvillage_data", n_labeled=num_labeled, one_hot=True)
+plantvillage = input_data.read_data_sets("/mount/SDC/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
 
 saver = tf.train.Saver()
 
@@ -240,17 +254,19 @@ print "=== Training ==="
 
 for i in tqdm(range(i_iter, num_iter)):
     images, labels = plantvillage.train.next_batch(batch_size)
-    sess.run(train_step, feed_dict={inputs: images, outputs: labels, training: True})
+    _, loss_val = sess.run([train_step, loss], feed_dict={inputs: images, outputs: labels, training: True})
+    #print("Loss Val : ", loss_val)
     if (i > 1) and ((i+1) % (num_iter/num_epochs) == 0):
         epoch_n = i/(num_examples/batch_size)
-        if (epoch_n+1) >= decay_after:
-            # decay learning rate
-            # learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
-            ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
-            ratio = max(0, ratio / (num_epochs - decay_after))
-            sess.run(learning_rate.assign(starter_learning_rate * ratio))
+		# Disable Learning Rate Decay
+        # if (epoch_n+1) >= decay_after:
+        #     # decay learning rate
+        #     # learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
+        #     ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
+        #     ratio = max(0, ratio / (num_epochs - decay_after))
+        #     sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-        #print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs:plantvillage.test.labels, training: False}), "%"
+        print("Epoch : "+str(epoch_n)+"  Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%")
         with open('train_log', 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)

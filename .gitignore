@@ -4,3 +4,4 @@ checkpoints/
 *.pyc
 train_log
 plantvillage_data/
+*.log
