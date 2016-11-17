@@ -149,7 +149,7 @@ class SemiDataSet(object):
         shuffled_indices = numpy.random.permutation(indices)
         images = images[shuffled_indices]
         labels = labels[shuffled_indices]
-        y = numpy.array([numpy.arange(38)[l==1][0] for l in labels])
+        y = numpy.array([numpy.arange(len(set(labels)))[l==1][0] for l in labels])
         idx = indices[y==0][:5]
 
         n_classes = int(y.max() + 1)
