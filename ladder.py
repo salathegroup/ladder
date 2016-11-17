@@ -20,20 +20,12 @@ TO-DO
 """
 
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
-layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage
-layer_sizes = [2048, 2000, 1000, 500, 250, 125, 38]
+layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage (RGB with 32 classes)
+layer_sizes = [2048, 2000, 1000, 500, 250, 125, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 L = len(layer_sizes) - 1  # number of layers
 
-num_examples = 43444
-num_epochs = 400
-num_labeled = 380
-
-starter_learning_rate = 0.00005
-
-# decay_after = 15  # epoch after which to begin learning rate decay
-
 batch_size = 100
-num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
+starter_learning_rate = 0.00005
 
 inputs = tf.placeholder(tf.float32, shape=(None, layer_sizes[0]))
 outputs = tf.placeholder(tf.float32)
@@ -226,7 +218,13 @@ with tf.control_dependencies([train_step]):
 
 print "===  Loading Data ==="
 #plantvillage = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
-plantvillage = input_data.read_data_sets("/mount/SDC/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
+
+num_labeled = 380
+plantvillage = input_data.read_data_sets("/mount/SDB/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
+num_examples = 43444
+num_epochs = 800
+# decay_after = 15  # epoch after which to begin learning rate decay
+num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 saver = tf.train.Saver()
 
@@ -256,7 +254,7 @@ for i in tqdm(range(i_iter, num_iter)):
     images, labels = plantvillage.train.next_batch(batch_size)
     _, loss_val = sess.run([train_step, loss], feed_dict={inputs: images, outputs: labels, training: True})
     #print("Loss Val : ", loss_val)
-    if (i > 1) and ((i+1) % (num_iter/num_epochs) == 0):
+    if (i > 1) and ((i+1) % int(num_iter/num_epochs) == 0):
         epoch_n = i/(num_examples/batch_size)
 		# Disable Learning Rate Decay
         # if (epoch_n+1) >= decay_after:
@@ -266,13 +264,14 @@ for i in tqdm(range(i_iter, num_iter)):
         #     ratio = max(0, ratio / (num_epochs - decay_after))
         #     sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-        print("Epoch : "+str(epoch_n)+"  Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%")
+        _acc = sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
+        print("Epoch : "+str(epoch_n)+" Accuracy : "+str(_acc))+"%"
         with open('train_log', 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
             #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
             #train_log_w.writerow(log_i)
-            train_log_w.writerow(["Epoch :: "] + [str(epoch_n)])
+            train_log_w.writerow(["Epoch :: " + str(epoch_n) + " Accuracy :: " + str(_acc)])
 
 print "Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%"
 
