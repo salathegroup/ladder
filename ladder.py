@@ -222,7 +222,7 @@ print "===  Loading Data ==="
 num_labeled = 380
 plantvillage = input_data.read_data_sets("/mount/SDB/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
 num_examples = 43444
-num_epochs = 400
+num_epochs = 800
 decay_after = 15  # epoch after which to begin learning rate decay
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
