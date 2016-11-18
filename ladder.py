@@ -21,7 +21,7 @@ TO-DO
 
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
 layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage (RGB with 32 classes)
-layer_sizes = [2048, 2000, 1000, 500, 250, 125, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+layer_sizes = [2048, 2000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 L = len(layer_sizes) - 1  # number of layers
 
 batch_size = 100
@@ -222,8 +222,8 @@ print "===  Loading Data ==="
 num_labeled = 380
 plantvillage = input_data.read_data_sets("/mount/SDB/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
 num_examples = 43444
-num_epochs = 800
-# decay_after = 15  # epoch after which to begin learning rate decay
+num_epochs = 400
+decay_after = 15  # epoch after which to begin learning rate decay
 num_iter = (num_examples/batch_size) * num_epochs  # number of loop iterations
 
 saver = tf.train.Saver()
@@ -256,13 +256,12 @@ for i in tqdm(range(i_iter, num_iter)):
     #print("Loss Val : ", loss_val)
     if (i > 1) and ((i+1) % int(num_iter/num_epochs) == 0):
         epoch_n = i/(num_examples/batch_size)
-		# Disable Learning Rate Decay
-        # if (epoch_n+1) >= decay_after:
-        #     # decay learning rate
-        #     # learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
-        #     ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
-        #     ratio = max(0, ratio / (num_epochs - decay_after))
-        #     sess.run(learning_rate.assign(starter_learning_rate * ratio))
+        if (epoch_n+1) >= decay_after:
+             # decay learning rate
+             #learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
+             ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
+             ratio = max(0, ratio / (num_epochs - decay_after))
+             sess.run(learning_rate.assign(starter_learning_rate * ratio))
         saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
         _acc = sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
         print("Epoch : "+str(epoch_n)+" Accuracy : "+str(_acc))+"%"
