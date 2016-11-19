@@ -5,3 +5,4 @@ checkpoints/
 train_log
 plantvillage_data/
 *.log
+*.png
