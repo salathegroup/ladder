@@ -20,8 +20,13 @@ TO-DO
 """
 
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
-layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage (RGB with 32 classes)
-layer_sizes = [2048, 2000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+#layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage (RGB with 32 classes)
+#layer_sizes = [2048, 2000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+#layer_sizes = [2048, 2000, 2000, 2000, 1000, 500, 38] # ** Best Performing till now !! 
+layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
+layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+
 L = len(layer_sizes) - 1  # number of layers
 
 batch_size = 100
@@ -273,5 +278,4 @@ for i in tqdm(range(i_iter, num_iter)):
             train_log_w.writerow(["Epoch :: " + str(epoch_n) + " Accuracy :: " + str(_acc)])
 
 print "Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False}), "%"
-
 sess.close()
