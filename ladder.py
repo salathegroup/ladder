@@ -26,6 +26,8 @@ TO-DO
 layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
 layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
+layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
+
 
 L = len(layer_sizes) - 1  # number of layers
 
