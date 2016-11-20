@@ -277,7 +277,7 @@ for i in tqdm(range(i_iter, num_iter)):
         saver.save(sess, 'checkpoints'+"_".join(layer_sizes_str)+'/model.ckpt', epoch_n)
         _acc = sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
         print("Epoch : "+str(epoch_n)+" Accuracy : "+str(_acc))+"%"
-        with open('train_log'+"_".join(layer_sizes), 'ab') as train_log:
+        with open('train_log'+"_".join(layer_sizes_str), 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
             #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
