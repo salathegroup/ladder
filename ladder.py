@@ -3,6 +3,7 @@ import math
 import os
 import csv
 from tqdm import tqdm
+import sys
 
 """
 Temporary Monkey Patch
@@ -27,7 +28,11 @@ layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till
 layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
+layer_sizes = [2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 38] # ** Best Performing till now !! 
 
+layer_sizes = sys.argv[1].split("_")
+layer_sizes = [int(x) for x in layer_sizes]
+print layer_sizes
 
 L = len(layer_sizes) - 1  # number of layers
 
@@ -240,7 +245,7 @@ sess = tf.Session()
 
 i_iter = 0
 
-ckpt = tf.train.get_checkpoint_state('checkpoints/')  # get latest checkpoint (if any)
+ckpt = tf.train.get_checkpoint_state('checkpoints'+"_".join(layer_sizes)+'/')  # get latest checkpoint (if any)
 if ckpt and ckpt.model_checkpoint_path:
     # if checkpoint exists, restore the parameters and set epoch_n and i_iter
     saver.restore(sess, ckpt.model_checkpoint_path)
@@ -249,8 +254,8 @@ if ckpt and ckpt.model_checkpoint_path:
     print "Restored Epoch ", epoch_n
 else:
     # no checkpoint exists. create checkpoints directory if it does not exist.
-    if not os.path.exists('checkpoints'):
-        os.makedirs('checkpoints')
+    if not os.path.exists('checkpoints'+"_".join(layer_sizes)):
+        os.makedirs('checkpoints'+"_".join(layer_sizes))
     init = tf.initialize_all_variables()
     sess.run(init)
 
@@ -269,10 +274,10 @@ for i in tqdm(range(i_iter, num_iter)):
              ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
              ratio = max(0, ratio / (num_epochs - decay_after))
              sess.run(learning_rate.assign(starter_learning_rate * ratio))
-        saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
+        saver.save(sess, 'checkpoints'+"_".join(layer_sizes)+'/model.ckpt', epoch_n)
         _acc = sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
         print("Epoch : "+str(epoch_n)+" Accuracy : "+str(_acc))+"%"
-        with open('train_log', 'ab') as train_log:
+        with open('train_log'+"_".join(layer_sizes), 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
             #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
