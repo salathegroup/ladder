@@ -29,6 +29,7 @@ layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (Inceptio
 layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
 layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
 layer_sizes = [2048, 2048, 2048, 2048, 2048, 2048, 1000, 1000, 1000, 38] # ** Best Performing till now !! 
+layer_sizes = [2048, 2048, 1024, 1024, 512, 512, 512, 256, 256, 38] # ** Best Performing till now !! 
 
 layer_sizes_str = sys.argv[1].split("_")
 layer_sizes = [int(x) for x in layer_sizes_str]
