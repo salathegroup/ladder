@@ -22,14 +22,14 @@ TO-DO
 
 #layer_sizes = [784, 1000, 500, 250, 250, 250, 10] #For MNIST
 #layer_sizes = [196608, 1000, 500, 250, 250, 250, 32] #For PlantVillage (RGB with 32 classes)
-#layer_sizes = [2048, 2000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
-#layer_sizes = [2048, 2000, 2000, 2000, 1000, 500, 38] # ** Best Performing till now !! 
-layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
-layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
-layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes) 
-layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !! 
-layer_sizes = [2048, 2048, 2048, 2048, 2048, 2048, 1000, 1000, 1000, 38] # ** Best Performing till now !! 
-layer_sizes = [2048, 2048, 1024, 1024, 512, 512, 512, 256, 256, 38] # ** Best Performing till now !! 
+#layer_sizes = [2048, 2000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes)
+#layer_sizes = [2048, 2000, 2000, 2000, 1000, 500, 38] # ** Best Performing till now !!
+layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !!
+layer_sizes = [2048, 3000, 2000, 1000, 500, 250, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes)
+layer_sizes = [2048, 3000, 3000, 2000, 2000, 1000, 500, 38] #For PlantVillage (InceptionV3 bottleneck fingerprints with 38 classes)
+layer_sizes = [2048, 2000, 2000, 2000, 2000, 2000, 38] # ** Best Performing till now !!
+layer_sizes = [2048, 2048, 2048, 2048, 2048, 2048, 1000, 1000, 1000, 38] # ** Best Performing till now !!
+layer_sizes = [2048, 2048, 1024, 1024, 512, 512, 512, 256, 256, 38] # ** Best Performing till now !!
 
 layer_sizes_str = sys.argv[1].split("_")
 layer_sizes = [int(x) for x in layer_sizes_str]
@@ -232,7 +232,7 @@ with tf.control_dependencies([train_step]):
 print "===  Loading Data ==="
 #plantvillage = input_data.read_data_sets("MNIST_data", n_labeled=num_labeled, one_hot=True)
 
-num_labeled = 380
+num_labeled = 380*2
 plantvillage = input_data.read_data_sets("/mount/SDB/paper-data/output-aggregated/", n_labeled=num_labeled, one_hot=True)
 num_examples = 43444
 num_epochs = 800
@@ -246,7 +246,7 @@ sess = tf.Session()
 
 i_iter = 0
 
-ckpt = tf.train.get_checkpoint_state('checkpoints'+"_".join(layer_sizes_str)+'/')  # get latest checkpoint (if any)
+ckpt = tf.train.get_checkpoint_state('checkpoints'+"_".join(layer_sizes_str)+"_nl"+str(num_labeled)+'/')  # get latest checkpoint (if any)
 if ckpt and ckpt.model_checkpoint_path:
     # if checkpoint exists, restore the parameters and set epoch_n and i_iter
     saver.restore(sess, ckpt.model_checkpoint_path)
@@ -255,8 +255,8 @@ if ckpt and ckpt.model_checkpoint_path:
     print "Restored Epoch ", epoch_n
 else:
     # no checkpoint exists. create checkpoints directory if it does not exist.
-    if not os.path.exists('checkpoints'+"_".join(layer_sizes_str)):
-        os.makedirs('checkpoints'+"_".join(layer_sizes_str))
+    if not os.path.exists('checkpoints'+"_".join(layer_sizes_str)+"_nl"+str(num_labeled)):
+        os.makedirs('checkpoints'+"_".join(layer_sizes_str)+"_nl"+str(num_labeled))
     init = tf.initialize_all_variables()
     sess.run(init)
 
@@ -275,10 +275,10 @@ for i in tqdm(range(i_iter, num_iter)):
              ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
              ratio = max(0, ratio / (num_epochs - decay_after))
              sess.run(learning_rate.assign(starter_learning_rate * ratio))
-        saver.save(sess, 'checkpoints'+"_".join(layer_sizes_str)+'/model.ckpt', epoch_n)
+        saver.save(sess, 'checkpoints'+"_".join(layer_sizes_str)+"_nl"+str(num_labeled)+'/model.ckpt', epoch_n)
         _acc = sess.run(accuracy, feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
         print("Epoch : "+str(epoch_n)+" Accuracy : "+str(_acc))+"%"
-        with open('train_log'+"_".join(layer_sizes_str), 'ab') as train_log:
+        with open('train_log'+"_".join(layer_sizes_str)+"_nl"+str(num_labeled), 'ab') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
             #log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: plantvillage.test.images, outputs: plantvillage.test.labels, training: False})
